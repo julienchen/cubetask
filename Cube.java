@@ -14,7 +14,7 @@ public class Cube {
 	private Map cubePieces;
 	
 	
-	public Cube(Map cubePieces) {
+	public Cube(Map cubePieces,int cubeSize) {
 		this.cubePieces = cubePieces;
 		
 	}
@@ -23,10 +23,19 @@ public class Cube {
 		return (CubePiece)this.cubePieces.get(i);	
 	}
 	
-	public boolean match2Pieces(CubePiece basePiece, int edgeSide, CubePiece matchPiece) {
+	
+	public boolean match2Pieces(CubePiece basePiece, int edgeSide, CubePiece matchPiece){
+			return match2Pieces(basePiece,edgeSide,matchPiece,true);
+	}
+	
+	
+	
+	public boolean match2Pieces(CubePiece basePiece, int edgeSide, CubePiece matchPiece, boolean isAbleToRotate) {
 		int N = basePiece.getPiece()[0].length;
 		boolean [] matchResults = {false,false,false,false,false};
+		boolean [] hasMatchResults = {false,false,false,false,false} ;
 		boolean hasMatch;
+		int rotateeMaxTime;
 		
 		if ((edgeSide == UP_EDGE && basePiece.getUpMatchPieceID() != 0) ||
 		    (edgeSide == RIGHT_EDGE && basePiece.getRightMatchPieceID() != 0) ||
@@ -34,41 +43,115 @@ public class Cube {
 		    (edgeSide == LEFT_EDGE && basePiece.getLeftMatchPieceID() != 0) )
 		return false;
 		
-		for (int k=0; k<= MAX_ROTATE_STEP; k++) {
+		if (isAbleToRotate)  rotateeMaxTime=MAX_ROTATE_STEP;
+		else rotateeMaxTime = 1;
+		
+		for (int k=0; k<= rotateeMaxTime; k++) {
 			
 			hasMatch=true;
+			 
 			
-			for(int i=0; i<N; i++) {
-				if (edgeSide == UP_EDGE) {
-					matchResults[i] = basePiece.getPiece()[0][i]^matchPiece.getPiece()[N-1][i];
-				}else if(edgeSide == RIGHT_EDGE) {
-					matchResults[i] = basePiece.getPiece()[i][N-1]^matchPiece.getPiece()[i][0];
-				}else if(edgeSide == DOWN_EDGE) {
-					matchResults[i] = basePiece.getPiece()[N-1][i]^matchPiece.getPiece()[0][i];
-				}else if(edgeSide == LEFT_EDGE) {
-					matchResults[i] = basePiece.getPiece()[i][0]^matchPiece.getPiece()[i][N-1];
-				}
-			}	
-			
-			for (int j=0; j<N; j++) {
-				hasMatch = hasMatch && matchResults[j];
-				//System.out.println(matchResults[j]);
-			}
-			
-			if (hasMatch) {
-				if (edgeSide == UP_EDGE) {
+			if (edgeSide == UP_EDGE) {
+				for(int i=0; i<N; i++) {
+					matchResults[i] = basePiece.getPiece()[0][i]^matchPiece.getPiece()[N-1][i];	
+					hasMatchResults[i] = matchResults[i];
+					
+					if (i==0 || i==N-1) {
+						
+						if  (i==0 && matchResults[i] && basePiece.isUpLeftCornerMatch())   hasMatchResults[i]=false;
+						if  (i==N-1 && matchResults[i] && basePiece.isUpRightCornerMatch())  hasMatchResults[i]=false;
+						
+						if (!matchResults[i] && !basePiece.getPiece()[0][i] && !matchPiece.getPiece()[N-1][i]  
+							&& (basePiece.getPiece()[1][i]||matchPiece.getPiece()[N-2][i]) )
+							hasMatchResults[i] = true;
+						
+				    }
+					
+					hasMatch = hasMatch && hasMatchResults[i];
+				}	
+				
+				if (hasMatch) {
+					if (matchResults[0]) {
+						basePiece.setUpLeftCornerMatch(matchResults[0]);
+						matchPiece.setDownLeftCornerMatch(matchResults[0]);
+					}
+					if (matchResults[N-1]) {
+						basePiece.setUpRightCornerMatch(matchResults[N-1]);
+						matchPiece.setDownRightCornerMatch(matchResults[N-1]);
+					}
 					basePiece.setUpMatchPieceID(matchPiece.getID());
 					matchPiece.setDownMatchPieceID(basePiece.getID());
-				}else if(edgeSide == RIGHT_EDGE) {
-					basePiece.setRightMatchPieceID(matchPiece.getID());
-					matchPiece.setLeftMatchPieceID(basePiece.getID());
-				}else if(edgeSide == DOWN_EDGE) {
-					basePiece.setDownMatchPieceID(matchPiece.getID());
-					matchPiece.setUpMatchPieceID(basePiece.getID());
-				}else if(edgeSide == LEFT_EDGE) {
-					basePiece.setLeftMatchPieceID(matchPiece.getID());
-					matchPiece.setRightMatchPieceID(basePiece.getID());
 				}
+					
+					
+			}else if(edgeSide == RIGHT_EDGE) {
+				    for(int i=0; i<N; i++) {
+				    	matchResults[i] = basePiece.getPiece()[i][N-1]^matchPiece.getPiece()[i][0];
+				    	if (i==0 || i==N-1) {
+						
+				    		if (!matchResults[i] && !basePiece.getPiece()[i][N-1] && !matchPiece.getPiece()[i][0]  
+				    				&& (basePiece.getPiece()[i][N-2]||matchPiece.getPiece()[i][1]) )
+								matchResults[i] = true;
+				    	}
+				    	hasMatch = hasMatch && matchResults[i];
+				    }
+				    
+					if (hasMatch) {
+						basePiece.setUpRightCornerMatch(matchResults[0]);
+						matchPiece.setUpLeftCornerMatch(matchResults[0]);
+						basePiece.setDownRightCornerMatch(matchResults[N-1]);
+						matchPiece.setDownLeftCornerMatch(matchResults[N-1]);
+						
+						basePiece.setRightMatchPieceID(matchPiece.getID());
+						matchPiece.setLeftMatchPieceID(basePiece.getID());
+					}
+
+			}else if(edgeSide == DOWN_EDGE) {
+					for(int i=0; i<N; i++) {					
+						matchResults[i] = basePiece.getPiece()[N-1][i]^matchPiece.getPiece()[0][i];
+						if (i==0 || i==N-1) {
+	
+							if (!matchResults[i] && !basePiece.getPiece()[N-1][i] && !matchPiece.getPiece()[0][i]  
+								&& (basePiece.getPiece()[N-2][i]||matchPiece.getPiece()[1][i]) )
+									matchResults[i] = true;
+						}
+						hasMatch = hasMatch && matchResults[i];
+					}
+					if (hasMatch) {
+						basePiece.setDownLeftCornerMatch(matchResults[0]);
+						matchPiece.setUpLeftCornerMatch(matchResults[0]);
+						basePiece.setDownRightCornerMatch(matchResults[N-1]);
+						matchPiece.setUpRightCornerMatch(matchResults[N-1]);
+						
+						basePiece.setDownMatchPieceID(matchPiece.getID());
+						matchPiece.setUpMatchPieceID(basePiece.getID());
+					}
+					
+			}else if(edgeSide == LEFT_EDGE) {
+					for(int i=0; i<N; i++) {	
+						matchResults[i] = basePiece.getPiece()[i][0]^matchPiece.getPiece()[i][N-1];
+						if (i==0 || i==N-1) {
+						
+							if (!matchResults[i] && !basePiece.getPiece()[i][0] && !matchPiece.getPiece()[i][N-1]  
+							&& (basePiece.getPiece()[i][1]||matchPiece.getPiece()[i][N-2]) )
+								matchResults[i] = true;
+						}
+						hasMatch = hasMatch && matchResults[i];
+					}
+					
+					if (hasMatch) {
+						basePiece.setUpLeftCornerMatch(matchResults[0]);
+						matchPiece.setUpRightCornerMatch(matchResults[0]);
+						basePiece.setDownLeftCornerMatch(matchResults[N-1]);
+						matchPiece.setDownRightCornerMatch(matchResults[N-1]);
+						
+						basePiece.setLeftMatchPieceID(matchPiece.getID());
+						matchPiece.setRightMatchPieceID(basePiece.getID());
+					}	
+			}	
+						
+			
+			if (hasMatch) {
 				matchPiece.setRotateStep(k+1);
 				return true;
 			}
@@ -98,7 +181,48 @@ public class Cube {
 		return false;
 	}
 	
+	
+	public boolean match2Edges(Edge baseEdge, Edge matchEdge){
+		int N = baseEdge.getEdge()[0].length ;
+		boolean [] matchResults = {false,false,false,false,false};
+		boolean hasMatch=true;
 
+		for(int i=0; i<N; i++) {
+			matchResults[i] = baseEdge.getEdge()[0][i]^matchEdge.getEdge()[0][i];		
+			
+			if (i==0 || i==N-1) {	
+				if (!matchResults[i] && !baseEdge.getEdge()[0][i] && !matchEdge.getEdge()[0][i]  
+					&& (baseEdge.getEdge()[1][i]||matchEdge.getEdge()[1][i]) )
+						matchResults[i] = true;
+				
+				 
+				
+		    }
+			
+			hasMatch = hasMatch && matchResults[i];
+		}	
+		
+		return hasMatch;
+		
+	}
+	
+
+	public boolean matchFacePiece(CubePiece basePiece, CubePiece matchPiece){
+		
+		if (match2Pieces(this.getCubePiece(basePiece.getUpMatchPieceID()),UP_EDGE,matchPiece)) {
+			
+			if (match2Edges(basePiece.getRightEdge(),matchPiece.getRightEdge()) &&
+				match2Edges(basePiece.getDownEdge(),matchPiece.getDownEdge())  &&
+				match2Edges(basePiece.getLeftEdge(),matchPiece.getLeftEdge()))
+			return true;
+			
+		}
+		
+		return false;	
+		
+	}
+	
+	
 	public static void main(String[] args) {
 		final boolean O = false;
 		final boolean I = true;

@@ -1,15 +1,23 @@
 package happycube;
 
 public class CubePiece {
-
+	
 	private int ID;
 	private int upMatchPieceID;
 	private int rightMatchPieceID;
 	private int downMatchPieceID;
 	private int leftMatchPieceID;
 	private boolean [][] piece;
+	private Edge upEdge;
+	private Edge rightEdge;
+	private Edge downEdge;
+	private Edge leftEdge;
 	private boolean mirroring;
 	private int rotateStep;
+	private boolean upLeftCornerMatch;
+	private boolean upRightCornerMatch;
+	private boolean downLeftCornerMatch;
+	private boolean downRightCornerMatch;
 	
 	public CubePiece(int ID, boolean[][] piece){
 		this.ID = ID;
@@ -20,6 +28,15 @@ public class CubePiece {
 		this.leftMatchPieceID = 0;
 		this.setMirroring(false);
 		this.setRotateStep(0);
+		
+		this.setUpEdge(piece);
+		CubePiece.rotatePiece(piece);
+		this.setRightEdge(piece);
+		CubePiece.rotatePiece(piece);
+		this.setDownEdge(piece);
+		CubePiece.rotatePiece(piece);
+		this.setLeftEdge(piece);
+		CubePiece.rotatePiece(piece);
 		
 	}
 	
@@ -209,6 +226,138 @@ public class CubePiece {
 	public void setMirroring(boolean mirroring) {
 		this.mirroring = mirroring;
 	}
+
+
+	/**
+	 * @return the upLeftCornerMatch
+	 */
+	public boolean isUpLeftCornerMatch() {
+		return upLeftCornerMatch;
+	}
+
+
+	/**
+	 * @param upLeftCornerMatch the upLeftCornerMatch to set
+	 */
+	public void setUpLeftCornerMatch(boolean upLeftCornerMatch) {
+		this.upLeftCornerMatch = upLeftCornerMatch;
+	}
+
+
+	/**
+	 * @return the upRightCornerMatch
+	 */
+	public boolean isUpRightCornerMatch() {
+		return upRightCornerMatch;
+	}
+
+
+	/**
+	 * @param upRightCornerMatch the upRightCornerMatch to set
+	 */
+	public void setUpRightCornerMatch(boolean upRightCornerMatch) {
+		this.upRightCornerMatch = upRightCornerMatch;
+	}
+
+
+	/**
+	 * @return the downLeftCornerMatch
+	 */
+	public boolean isDownLeftCornerMatch() {
+		return downLeftCornerMatch;
+	}
+
+
+	/**
+	 * @param downLeftCornerMatch the downLeftCornerMatch to set
+	 */
+	public void setDownLeftCornerMatch(boolean downLeftCornerMatch) {
+		this.downLeftCornerMatch = downLeftCornerMatch;
+	}
+
+
+	/**
+	 * @return the downRightCornerMatch
+	 */
+	public boolean isDownRightCornerMatch() {
+		return downRightCornerMatch;
+	}
+
+
+	/**
+	 * @param downRightCornerMatch the downRightCornerMatch to set
+	 */
+	public void setDownRightCornerMatch(boolean downRightCornerMatch) {
+		this.downRightCornerMatch = downRightCornerMatch;
+	}
+
+
+	/**
+	 * @return the upEdge
+	 */
+	public Edge getUpEdge() {
+		return upEdge;
+	}
+
+
+	/**
+	 * @param upEdge the upEdge to set
+	 */
+	public void setUpEdge(Edge upEdge) {
+		this.upEdge = upEdge;
+	}
+
+
+	/**
+	 * @return the rightEdge
+	 */
+	public Edge getRightEdge() {
+		return rightEdge;
+	}
+
+
+	/**
+	 * @param rightEdge the rightEdge to set
+	 */
+	public void setRightEdge(Edge rightEdge) {
+		this.rightEdge = rightEdge;
+	}
+
+
+	/**
+	 * @return the downEdge
+	 */
+	public Edge getDownEdge() {
+		return downEdge;
+	}
+
+
+	/**
+	 * @param downEdge the downEdge to set
+	 */
+	public void setDownEdge(Edge downEdge) {
+		this.downEdge = downEdge;
+	}
+
+
+	/**
+	 * @return the leftEdge
+	 */
+	public Edge getLeftEdge() {
+		return leftEdge;
+	}
+
+
+	/**
+	 * @param leftEdge the leftEdge to set
+	 */
+	public void setLeftEdge(Edge leftEdge) {
+		this.leftEdge = leftEdge;
+	}
+
+
+
 		
-	
-}
+		
+	}
+		
