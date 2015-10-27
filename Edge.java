@@ -4,8 +4,8 @@ public class Edge {
    
 	private boolean [][] edge; 
 	
-	public Edge() {
-		 
+	public Edge(boolean [][] edge) {
+		this.setEdge(edge); 
 	}
 
 	/**

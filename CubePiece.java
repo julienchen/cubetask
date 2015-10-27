@@ -28,14 +28,18 @@ public class CubePiece {
 		this.leftMatchPieceID = 0;
 		this.setMirroring(false);
 		this.setRotateStep(0);
+
+		this.upEdge = new Edge(piece);
 		
-		this.setUpEdge(piece);
 		CubePiece.rotatePiece(piece);
-		this.setRightEdge(piece);
+		this.rightEdge = new Edge(piece);
+		
 		CubePiece.rotatePiece(piece);
-		this.setDownEdge(piece);
+		this.downEdge = new Edge(piece);
+		
 		CubePiece.rotatePiece(piece);
-		this.setLeftEdge(piece);
+		this.leftEdge = new Edge(piece);
+		
 		CubePiece.rotatePiece(piece);
 		
 	}
@@ -356,8 +360,6 @@ public class CubePiece {
 	}
 
 
-
-		
-		
+	
 	}
 		

@@ -14,7 +14,7 @@ public class Cube {
 	private Map cubePieces;
 	
 	
-	public Cube(Map cubePieces,int cubeSize) {
+	public Cube(Map cubePieces) {
 		this.cubePieces = cubePieces;
 		
 	}
@@ -58,8 +58,8 @@ public class Cube {
 					
 					if (i==0 || i==N-1) {
 						
-						if  (i==0 && matchResults[i] && basePiece.isUpLeftCornerMatch())   hasMatchResults[i]=false;
-						if  (i==N-1 && matchResults[i] && basePiece.isUpRightCornerMatch())  hasMatchResults[i]=false;
+						if  ((i==0 && matchResults[i] && basePiece.isUpLeftCornerMatch()) ||
+						     (i==N-1 && matchResults[i] && basePiece.isUpRightCornerMatch())) hasMatchResults[i]=false;
 						
 						if (!matchResults[i] && !basePiece.getPiece()[0][i] && !matchPiece.getPiece()[N-1][i]  
 							&& (basePiece.getPiece()[1][i]||matchPiece.getPiece()[N-2][i]) )
@@ -88,7 +88,9 @@ public class Cube {
 				    for(int i=0; i<N; i++) {
 				    	matchResults[i] = basePiece.getPiece()[i][N-1]^matchPiece.getPiece()[i][0];
 				    	if (i==0 || i==N-1) {
-						
+				    		if  ((i==0 && matchResults[i] && basePiece.isUpRightCornerMatch()) ||
+								 (i==N-1 && matchResults[i] && basePiece.isDownRightCornerMatch()) ) hasMatchResults[i]=false;
+							
 				    		if (!matchResults[i] && !basePiece.getPiece()[i][N-1] && !matchPiece.getPiece()[i][0]  
 				    				&& (basePiece.getPiece()[i][N-2]||matchPiece.getPiece()[i][1]) )
 								matchResults[i] = true;
@@ -111,6 +113,9 @@ public class Cube {
 						matchResults[i] = basePiece.getPiece()[N-1][i]^matchPiece.getPiece()[0][i];
 						if (i==0 || i==N-1) {
 	
+							if  ((i==0 && matchResults[i] && basePiece.isDownLeftCornerMatch()) ||
+							    (i==N-1 && matchResults[i] && basePiece.isDownRightCornerMatch()))  hasMatchResults[i]=false;
+							
 							if (!matchResults[i] && !basePiece.getPiece()[N-1][i] && !matchPiece.getPiece()[0][i]  
 								&& (basePiece.getPiece()[N-2][i]||matchPiece.getPiece()[1][i]) )
 									matchResults[i] = true;
@@ -132,6 +137,9 @@ public class Cube {
 						matchResults[i] = basePiece.getPiece()[i][0]^matchPiece.getPiece()[i][N-1];
 						if (i==0 || i==N-1) {
 						
+							if  ((i==0 && matchResults[i] && basePiece.isUpLeftCornerMatch()) ||
+							    (i==N-1 && matchResults[i] && basePiece.isDownLeftCornerMatch()) ) hasMatchResults[i]=false;
+							
 							if (!matchResults[i] && !basePiece.getPiece()[i][0] && !matchPiece.getPiece()[i][N-1]  
 							&& (basePiece.getPiece()[i][1]||matchPiece.getPiece()[i][N-2]) )
 								matchResults[i] = true;
@@ -153,12 +161,14 @@ public class Cube {
 			
 			if (hasMatch) {
 				matchPiece.setRotateStep(k+1);
+				basePiece.printPiece();
+				matchPiece.printPiece();
 				return true;
 			}
 			else if (k!=3) { 
 				CubePiece.rotatePiece(matchPiece.getPiece());
 				System.out.println(k);
-				matchPiece.printPiece();
+				
 			}
 			else { // Once rotate 360°, mirror the piece.
 				CubePiece.rotatePiece(matchPiece.getPiece());
@@ -284,6 +294,11 @@ public class Cube {
 	  
 	  Cube testCube = new Cube(testCubePieces);
 	  testCube.matchAllEdges(cubePiece1, cubePiece2);
+	  
+	  UnfoldedSolution.putCubePiece(testCube);
+	  UnfoldedSolution.printUnfoldedSolution();
+	  
+	  
 	  
 	  System.out.println(cubePiece1.getLeftMatchPieceID());
 	  System.out.println(cubePiece1.getDownMatchPieceID());
