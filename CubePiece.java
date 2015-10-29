@@ -7,6 +7,7 @@ public class CubePiece {
 	private int rightMatchPieceID;
 	private int downMatchPieceID;
 	private int leftMatchPieceID;
+	private int faceMatchPieceID;
 	private boolean [][] piece;
 	private Edge upEdge;
 	private Edge rightEdge;
@@ -357,6 +358,22 @@ public class CubePiece {
 	 */
 	public void setLeftEdge(Edge leftEdge) {
 		this.leftEdge = leftEdge;
+	}
+
+
+	/**
+	 * @return the faceMatchPieceID
+	 */
+	public int getFaceMatchPieceID() {
+		return faceMatchPieceID;
+	}
+
+
+	/**
+	 * @param faceMatchPieceID the faceMatchPieceID to set
+	 */
+	public void setFaceMatchPieceID(int faceMatchPieceID) {
+		this.faceMatchPieceID = faceMatchPieceID;
 	}
 
 

@@ -22,4 +22,14 @@ public class Edge {
 		this.edge = edge;
 	}
 
+	
+	public void printEdge() {
+
+		for (int j=0; j< this.getEdge()[0].length;j++) {
+				if (this.getEdge()[0][j])
+				    System.out.print("[]");
+				else System.out.print("  ");
+		}
+			
+	}
 }

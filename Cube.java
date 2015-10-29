@@ -11,10 +11,26 @@ public class Cube {
 	private static final int LEFT_EDGE=4;
 	private static final int MAX_ROTATE_STEP=7;
 	
-	private Map cubePieces;
+	private Map<Integer, CubePiece> cubePieces;
 	
 	
-	public Cube(Map cubePieces) {
+	public String getEdgeName(int i) {
+		String edgeString = null;
+	 
+		switch (i) {
+        case UP_EDGE:  	 edgeString = "UP_EDGE";
+                 break;
+        case RIGHT_EDGE: edgeString = "RIGHT_EDGE";
+                 break;
+        case DOWN_EDGE:  edgeString = "DOWN_EDGE";
+        		break;
+        case LEFT_EDGE:  edgeString = "LEFT_EDGE";
+				break; 		
+		}
+		return edgeString;
+	}
+	
+	public Cube(Map<Integer, CubePiece> cubePieces) {
 		this.cubePieces = cubePieces;
 		
 	}
@@ -161,13 +177,15 @@ public class Cube {
 			
 			if (hasMatch) {
 				matchPiece.setRotateStep(k+1);
-				basePiece.printPiece();
+				System.out.println( getEdgeName(edgeSide) );
+				
+				//basePiece.printPiece();
 				matchPiece.printPiece();
 				return true;
 			}
 			else if (k!=3) { 
 				CubePiece.rotatePiece(matchPiece.getPiece());
-				System.out.println(k);
+				//System.out.println(k);
 				
 			}
 			else { // Once rotate 360°, mirror the piece.
@@ -202,15 +220,18 @@ public class Cube {
 			
 			if (i==0 || i==N-1) {	
 				if (!matchResults[i] && !baseEdge.getEdge()[0][i] && !matchEdge.getEdge()[0][i]  
-					&& (baseEdge.getEdge()[1][i]||matchEdge.getEdge()[1][i]) )
+					&& (baseEdge.getEdge()[1][i]||matchEdge.getEdge()[1][i]) ){
 						matchResults[i] = true;
-				
-				 
-				
+				}
 		    }
 			
 			hasMatch = hasMatch && matchResults[i];
 		}	
+		
+		/*Show Edge match results*/
+		baseEdge.printEdge();
+		matchEdge.printEdge();
+		System.out.println("hasMatch=" + hasMatch);
 		
 		return hasMatch;
 		
@@ -219,18 +240,28 @@ public class Cube {
 
 	public boolean matchFacePiece(CubePiece basePiece, CubePiece matchPiece){
 		
-		if (match2Pieces(this.getCubePiece(basePiece.getUpMatchPieceID()),UP_EDGE,matchPiece)) {
+
+		if (matchAllEdges(this.getCubePiece(basePiece.getUpMatchPieceID()),matchPiece)) {
 			
 			if (match2Edges(basePiece.getRightEdge(),matchPiece.getRightEdge()) &&
 				match2Edges(basePiece.getDownEdge(),matchPiece.getDownEdge())  &&
 				match2Edges(basePiece.getLeftEdge(),matchPiece.getLeftEdge()))
-			return true;
-			
+			{
+				System.out.println( "AT FACE" );
+				matchPiece.printPiece();
+				return true;
+			}
 		}
+
 		
 		return false;	
 		
 	}
+	
+	
+	
+	
+	
 	
 	
 	public static void main(String[] args) {
@@ -282,33 +313,84 @@ public class Cube {
 	  CubePiece cubePiece5 = new CubePiece(5,piece5);
 	  CubePiece cubePiece6 = new CubePiece(6,piece6);
 	  
-	  Map testCubePieces = new HashMap();
+	  Map<Integer, CubePiece> testCubePieces = new HashMap<Integer, CubePiece>();
 	  
-	  testCubePieces.put(cubePiece1.getID(), cubePiece1);
-	  testCubePieces.put(cubePiece2.getID(), cubePiece2);
-	  testCubePieces.put(cubePiece3.getID(), cubePiece3);
-	  testCubePieces.put(cubePiece4.getID(), cubePiece4);
-	  testCubePieces.put(cubePiece5.getID(), cubePiece5);
-	  testCubePieces.put(cubePiece6.getID(), cubePiece6);
+	  testCubePieces.put(new Integer(cubePiece1.getID()), cubePiece1);
+	  testCubePieces.put(new Integer(cubePiece2.getID()), cubePiece2);
+	  testCubePieces.put(new Integer(cubePiece3.getID()), cubePiece3);
+	  testCubePieces.put(new Integer(cubePiece4.getID()), cubePiece4);
+	  testCubePieces.put(new Integer(cubePiece5.getID()), cubePiece5);
+	  testCubePieces.put(new Integer(cubePiece6.getID()), cubePiece6);
 	  
 	  
 	  Cube testCube = new Cube(testCubePieces);
-	  testCube.matchAllEdges(cubePiece1, cubePiece2);
 	  
-	  UnfoldedSolution.putCubePiece(testCube);
-	  UnfoldedSolution.printUnfoldedSolution();
+	  UnfoldedSolution.setInitialCubePieces(testCube);
+	  UnfoldedSolution.printUnfoldedDisplaying();
 	  
+	  int noMatchID=0;
+	  int noMatchNum=0;
 	  
+	  if(!testCube.matchAllEdges(cubePiece1, cubePiece2)) {  
+		  noMatchID = 2;
+		  noMatchNum += 1;
+		  if (!testCube.matchAllEdges(cubePiece1, cubePiece3))	System.out.println("Error, No match!");
+		  else if (!testCube.matchAllEdges(cubePiece1, cubePiece4))	System.out.println("Error, No match!");
+		  else if (!testCube.matchAllEdges(cubePiece1, cubePiece5))	System.out.println("Error, No match!");
+		  else if (!testCube.matchAllEdges(cubePiece1, cubePiece6))	System.out.println("Error, No match!");
+	  } else {
+		  if (!testCube.matchAllEdges(cubePiece1, cubePiece3)) {
+			  noMatchID = 3;
+			  noMatchNum += 1;
+			  if (!testCube.matchAllEdges(cubePiece1, cubePiece4))	System.out.println("Error, No match!");
+			  else if (!testCube.matchAllEdges(cubePiece1, cubePiece5))	System.out.println("Error, No match!");
+			  else if (!testCube.matchAllEdges(cubePiece1, cubePiece6))	System.out.println("Error, No match!");
+		  } else if (!testCube.matchAllEdges(cubePiece1, cubePiece4) ) {
+			  noMatchID = 4;
+			  noMatchNum += 1;
+				  if (!testCube.matchAllEdges(cubePiece1, cubePiece5))	System.out.println("Error, No match!");
+				  else if (!testCube.matchAllEdges(cubePiece1, cubePiece6))	System.out.println("Error, No match!");		  
+		  } else if (!testCube.matchAllEdges(cubePiece1, cubePiece5))  {
+			  noMatchID = 5;
+			  noMatchNum += 1;
+			         if (!testCube.matchAllEdges(cubePiece1, cubePiece6))	System.out.println("Error, No match!");	
+		  } else if (!testCube.matchAllEdges(cubePiece1, cubePiece6))  {
+			  noMatchID = 6;
+			  noMatchNum += 1;
+		  }
+	  }
 	  
-	  System.out.println(cubePiece1.getLeftMatchPieceID());
-	  System.out.println(cubePiece1.getDownMatchPieceID());
-	  System.out.println(cubePiece1.getRightMatchPieceID());
-	  System.out.println(cubePiece1.getUpMatchPieceID());
+	  System.out.println(noMatchID);
+	  
+	  if (noMatchNum == 1) {
+ 
+		  if( testCube.matchFacePiece(cubePiece1, testCube.getCubePiece(noMatchID))) 
+		  {  
+			  System.out.println("test OK");
+			  cubePiece1.setFaceMatchPieceID(noMatchID);
+			  UnfoldedSolution.setSolutionCubePieces(testCube);
+			  UnfoldedSolution.printUnfoldedDisplaying();
+		  } 
+		  
+	  } else {
+		  System.out.println("test KO");
+		  if (noMatchNum > 1) System.out.println("noMatchNum =" + noMatchNum);
+		  cubePiece1.setFaceMatchPieceID(noMatchID);
+		  UnfoldedSolution.setSolutionCubePieces(testCube);
+		  UnfoldedSolution.printUnfoldedDisplaying();
+		  
+	  }
 
-	  System.out.println(cubePiece2.getLeftMatchPieceID());
-	  System.out.println(cubePiece2.getDownMatchPieceID());
-	  System.out.println(cubePiece2.getRightMatchPieceID());
-	  System.out.println(cubePiece2.getUpMatchPieceID());
+	  System.out.println(cubePiece1.getUpMatchPieceID());
+	  System.out.println(cubePiece1.getRightMatchPieceID());  
+	  System.out.println(cubePiece1.getDownMatchPieceID());
+	  System.out.println(cubePiece1.getLeftMatchPieceID());
+	  
+
+	  //System.out.println(cubePiece2.getLeftMatchPieceID());
+	  //System.out.println(cubePiece2.getDownMatchPieceID());
+	  //System.out.println(cubePiece2.getRightMatchPieceID());
+	  //System.out.println(cubePiece2.getUpMatchPieceID());
 	  
 	}
 
