@@ -11,8 +11,13 @@ public class Cube {
 	private static final int LEFT_EDGE=4;
 	private static final int MAX_ROTATE_STEP=7;
 	
+	private int noMatchID;
+	private int noMatchNum;
+	private int basePieceID;
+	
 	private Map<Integer, CubePiece> cubePieces;
 	
+	private CubeStateStack<Integer> candidaturePieces;
 	private CubeStateStack<Cube> stack;
 	
 	public CubeStateStack<Cube> getStack(){
@@ -41,10 +46,15 @@ public class Cube {
 	}
 	
 	public Cube(Map<Integer, CubePiece> cubePieces) {
+		this.noMatchNum = 0;
 		this.cubePieces = cubePieces;
 		this.stack = new CubeStateStack<Cube>();
-		
+		this.candidaturePieces = new CubeStateStack<Integer>();
+		for (int i=6; i<2; i--) {
+			this.candidaturePieces.push(Integer.valueOf(i));
+		}	
 	}
+	
 	
 	public CubePiece getCubePiece(int i){
 		return (CubePiece)this.cubePieces.get(i);	
@@ -64,33 +74,67 @@ public class Cube {
 		boolean hasMatch;
 		int rotateeMaxTime;
 		
+		// Once the edge side has been occupied, then stop the matching process
 		if ((edgeSide == UP_EDGE && basePiece.getUpMatchPieceID() != 0) ||
 		    (edgeSide == RIGHT_EDGE && basePiece.getRightMatchPieceID() != 0) ||
 		    (edgeSide == DOWN_EDGE && basePiece.getDownMatchPieceID() != 0) ||
 		    (edgeSide == LEFT_EDGE && basePiece.getLeftMatchPieceID() != 0) )
 		return false;
 		
+		// All matching pieces can rotate 7 steps, except the last Piece
 		if (isAbleToRotate)  rotateeMaxTime=MAX_ROTATE_STEP;
 		else rotateeMaxTime = 1;
+		
 		
 		for (int k=matchPiece.getRotateStep(); k<= rotateeMaxTime; k++) {
 			
 			hasMatch=true;
-			 
-			
+			 			
 			if (edgeSide == UP_EDGE) {
 				for(int i=0; i<N; i++) {
+					// XOR the match pairs
 					matchResults[i] = basePiece.getPiece()[0][i]^matchPiece.getPiece()[N-1][i];	
 					hasMatchResults[i] = matchResults[i];
 					
+					// The corner of Cube can not be (1,1), Otherwise is OK
+					if (i==0) {		
+						// has not matched piece
+						if (basePiece.getLeftMatchPieceID()== 0) {
+							// 0 vs 0
+							if (!matchResults[i] && !basePiece.getPiece()[0][i] && !matchPiece.getPiece()[N-1][i]  
+									&& (basePiece.getPiece()[1][i]||matchPiece.getPiece()[N-2][i]) ) {
+									hasMatchResults[i] = true;
+							}
+							
+						}else { //has not matched piece   1 vs matched
+							if (matchPiece.getPiece()[N-1][i] && basePiece.isUpLeftCornerMatch())
+								hasMatchResults[i]=false;
+							
+							   // 0 vs 0
+							if (!matchResults[i] && !basePiece.getPiece()[0][i] && !matchPiece.getPiece()[N-1][i]  
+									&& (basePiece.getPiece()[1][i]||matchPiece.getPiece()[N-2][i]) ) {
+									hasMatchResults[i] = true;
+							}
+						
+						}
+					}
+					
+					
 					if (i==0 || i==N-1) {
 						
-						if  ((i==0 && matchResults[i] && basePiece.isUpLeftCornerMatch()) ||
-						     (i==N-1 && matchResults[i] && basePiece.isUpRightCornerMatch())) hasMatchResults[i]=false;
+						// For the corner point, if base piece has already matched with another piece, the 3rd piece should not be 1
+						if  ((i==0 &&  matchPiece.getPiece()[N-1][i] && basePiece.isUpLeftCornerMatch()) ||
+						     (i==N-1 && matchPiece.getPiece()[N-1][i] && basePiece.isUpRightCornerMatch())) hasMatchResults[i]=false;
 						
-						if (!matchResults[i] && !basePiece.getPiece()[0][i] && !matchPiece.getPiece()[N-1][i]  
-							&& (basePiece.getPiece()[1][i]||matchPiece.getPiece()[N-2][i]) )
-							hasMatchResults[i] = true;
+						// For the corner point, if never matched before, even both piece are 0,  we can accept if the points after them are not 1.
+						if  ( (i==0 && basePiece.getLeftMatchPieceID()== 0) || 
+								  (i==N-1 && basePiece.getRightMatchPieceID() == 0) ) {
+							if (!matchResults[i] && !basePiece.getPiece()[0][i] && !matchPiece.getPiece()[N-1][i]  
+									&& (basePiece.getPiece()[1][i]||matchPiece.getPiece()[N-2][i]) ) {
+									hasMatchResults[i] = true;
+							}
+						}
+							
 						
 				    }
 					
@@ -219,6 +263,8 @@ public class Cube {
 		else if (match2Pieces(basePiece,DOWN_EDGE,matchPiece)) return true;
 		else if (match2Pieces(basePiece,LEFT_EDGE,matchPiece)) return true;
 		
+		this.setNoMatchID(matchPiece.getID());
+		this.increaseNoMatchNum();
 		return false;
 	}
 	
@@ -400,6 +446,70 @@ public boolean matchFacePiece(CubePiece basePiece, CubePiece matchPiece){
 	  System.out.println(cubePiece1.getFaceMatchPieceID());
 	  */
 
+	}
+
+	/**
+	 * @return the candidaturePieces
+	 */
+	public CubeStateStack<Integer> getCandidaturePieces() {
+		return candidaturePieces;
+	}
+
+	/**
+	 * @param candidaturePieces the candidaturePieces to set
+	 */
+	public void setCandidaturePieces(CubeStateStack<Integer> candidaturePieces) {
+		this.candidaturePieces = candidaturePieces;
+	}
+
+	/**
+	 * @return the noMatchNum
+	 */
+	public int getNoMatchNum() {
+		return noMatchNum;
+	}
+
+	/**
+	 * @param noMatchNum the noMatchNum to set
+	 */
+	public void setNoMatchNum(int noMatchNum) {
+		this.noMatchNum = noMatchNum;
+	}
+	
+	/**
+	 * @param increase noMatchNum by 1
+	 */
+	
+	public void increaseNoMatchNum() {
+		this.noMatchNum += 1;
+	}
+
+	/**
+	 * @return the basePieceID
+	 */
+	public int getBasePieceID() {
+		return basePieceID;
+	}
+
+	/**
+	 * @param basePieceID the basePieceID to set
+	 */
+	public void setBasePieceID(int basePieceID) {
+		this.basePieceID = basePieceID;
+	}
+
+	/**
+	 * @return the noMatchID
+	 */
+	public int getNoMatchID() {
+		return noMatchID;
+	}
+
+	/**
+	 * @param noMatchID the noMatchID to set
+	 */
+	public void setNoMatchID(int noMatchID) {
+		this.noMatchID = noMatchID;
 	}
 
 }
