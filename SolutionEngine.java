@@ -12,18 +12,24 @@ public class SolutionEngine {
 	
 	public void searchSolution (Cube cube, boolean next) {
 				
-		  int noMatchID=0;
-		  int noMatchNum=0;
-
-		  for (int i=2; i< 6; i++) {
-			  
-			  if (cube.getCubePiece(1).getUpMatchPieceID() == i  ) {
-				  
-			  }
-			  
-		  }
-		  
-		  
+		
+		while  ( !cube.getcandidatePiecesID().isEmpty() )  {
+			 
+			 if (cube.getNoMatchNum() <2) {
+			 cube.matchAllEdges(cube.getCubePiece(cube.getBasePieceID()), cube.getCubePiece(cube.getcandidatePiecesID().peek().intValue()));
+			 } else {
+			   System.out.println("Error, No match!");
+			 }
+			 			 
+		 }  
+		
+		System.out.println("Finished!");	 
+		 
+		UnfoldedSolution.setSolutionCubePieces(cube);
+		UnfoldedSolution.printUnfoldedDisplaying(); 
+		 
+		
+		  /*
 		  
 		  
 		  if(!cube.matchAllEdges(cube.getCubePiece(1), cube.getCubePiece(2))) {  
@@ -83,6 +89,8 @@ public class SolutionEngine {
 		  System.out.println(cube.getCubePiece(1).getDownMatchPieceID());
 		  System.out.println(cube.getCubePiece(1).getLeftMatchPieceID());
 		  System.out.println(cube.getCubePiece(1).getFaceMatchPieceID());
+		  
+		  */
 		
 	}
 

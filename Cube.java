@@ -15,57 +15,28 @@ public class Cube {
 	private int noMatchNum;
 	private int basePieceID;
 	
-	private Map<Integer, CubePiece> cubePieces;
-	
-	private CubeStateStack<Integer> candidaturePieces;
-	private CubeStateStack<Cube> stack;
-	
-	public CubeStateStack<Cube> getStack(){
-		return stack;	
-	}
-	
-	public void setStack(CubeStateStack<Cube> stack){
-		this.stack = stack;
-	}
-	
-	
-	public String getEdgeName(int i) {
-		String edgeString = null;
-	 
-		switch (i) {
-        case UP_EDGE:  	 edgeString = "UP_EDGE";
-                 break;
-        case RIGHT_EDGE: edgeString = "RIGHT_EDGE";
-                 break;
-        case DOWN_EDGE:  edgeString = "DOWN_EDGE";
-        		break;
-        case LEFT_EDGE:  edgeString = "LEFT_EDGE";
-				break; 		
-		}
-		return edgeString;
-	}
+	private Map<Integer, CubePiece> cubePieces;	
+	private CubeStateStack<Integer> candidatePiecesID;
+	private CubeStateStack<Cube> stateStack;
+		
 	
 	public Cube(Map<Integer, CubePiece> cubePieces) {
+		this.noMatchID = 0;
 		this.noMatchNum = 0;
 		this.cubePieces = cubePieces;
-		this.stack = new CubeStateStack<Cube>();
-		this.candidaturePieces = new CubeStateStack<Integer>();
-		for (int i=6; i<2; i--) {
-			this.candidaturePieces.push(Integer.valueOf(i));
+		this.stateStack = new CubeStateStack<Cube>();
+		this.candidatePiecesID = new CubeStateStack<Integer>();
+		// initialize candidate stack
+		for (int i=cubePieces.size(); i<2; i--) {
+			this.candidatePiecesID.push(Integer.valueOf(i));
 		}	
 	}
-	
-	
-	public CubePiece getCubePiece(int i){
-		return (CubePiece)this.cubePieces.get(i);	
-	}
-	
-	
+
+		
 	public boolean match2Pieces(CubePiece basePiece, int edgeSide, CubePiece matchPiece){
 			return match2Pieces(basePiece,edgeSide,matchPiece,true);
 	}
-	
-	
+		
 	
 	public boolean match2Pieces(CubePiece basePiece, int edgeSide, CubePiece matchPiece, boolean isAbleToRotate) {
 		int N = basePiece.getPiece()[0].length;
@@ -84,177 +55,28 @@ public class Cube {
 		// All matching pieces can rotate 7 steps, except the last Piece
 		if (isAbleToRotate)  rotateeMaxTime=MAX_ROTATE_STEP;
 		else rotateeMaxTime = 1;
-		
-		
+				
 		for (int k=matchPiece.getRotateStep(); k<= rotateeMaxTime; k++) {
-			
-			hasMatch=true;
-			 			
-			if (edgeSide == UP_EDGE) {
-				for(int i=0; i<N; i++) {
-					// XOR the match pairs
-					matchResults[i] = basePiece.getPiece()[0][i]^matchPiece.getPiece()[N-1][i];	
-					hasMatchResults[i] = matchResults[i];
-					
-					// The corner of Cube can not be (1,1), Otherwise is OK
-					if (i==0) {		
-						// has not matched piece
-						if (basePiece.getLeftMatchPieceID()== 0) {
-							// 0 vs 0
-							if (!matchResults[i] && !basePiece.getPiece()[0][i] && !matchPiece.getPiece()[N-1][i]  
-									&& (basePiece.getPiece()[1][i]||matchPiece.getPiece()[N-2][i]) ) {
-									hasMatchResults[i] = true;
-							}
-							
-						}else { //has not matched piece   1 vs matched
-							if (matchPiece.getPiece()[N-1][i] && basePiece.isUpLeftCornerMatch())
-								hasMatchResults[i]=false;
-							
-							   // 0 vs 0
-							if (!matchResults[i] && !basePiece.getPiece()[0][i] && !matchPiece.getPiece()[N-1][i]  
-									&& (basePiece.getPiece()[1][i]||matchPiece.getPiece()[N-2][i]) ) {
-									hasMatchResults[i] = true;
-							}
-						
-						}
-					}
-					
-					
-					if (i==0 || i==N-1) {
-						
-						// For the corner point, if base piece has already matched with another piece, the 3rd piece should not be 1
-						if  ((i==0 &&  matchPiece.getPiece()[N-1][i] && basePiece.isUpLeftCornerMatch()) ||
-						     (i==N-1 && matchPiece.getPiece()[N-1][i] && basePiece.isUpRightCornerMatch())) hasMatchResults[i]=false;
-						
-						// For the corner point, if never matched before, even both piece are 0,  we can accept if the points after them are not 1.
-						if  ( (i==0 && basePiece.getLeftMatchPieceID()== 0) || 
-								  (i==N-1 && basePiece.getRightMatchPieceID() == 0) ) {
-							if (!matchResults[i] && !basePiece.getPiece()[0][i] && !matchPiece.getPiece()[N-1][i]  
-									&& (basePiece.getPiece()[1][i]||matchPiece.getPiece()[N-2][i]) ) {
-									hasMatchResults[i] = true;
-							}
-						}
-							
-						
-				    }
-					
-					hasMatch = hasMatch && hasMatchResults[i];
-				}	
-				
-				if (hasMatch) {
-					if (matchResults[0]) {
-						basePiece.setUpLeftCornerMatch(matchResults[0]);
-						matchPiece.setDownLeftCornerMatch(matchResults[0]);
-					}
-					if (matchResults[N-1]) {
-						basePiece.setUpRightCornerMatch(matchResults[N-1]);
-						matchPiece.setDownRightCornerMatch(matchResults[N-1]);
-					}
-					basePiece.setUpMatchPieceID(matchPiece.getID());
-					matchPiece.setDownMatchPieceID(basePiece.getID());
-				}
-					
-					
-			}else if(edgeSide == RIGHT_EDGE) {
-				    for(int i=0; i<N; i++) {
-				    	matchResults[i] = basePiece.getPiece()[i][N-1]^matchPiece.getPiece()[i][0];
-				    	if (i==0 || i==N-1) {
-				    		if  ((i==0 && matchResults[i] && basePiece.isUpRightCornerMatch()) ||
-								 (i==N-1 && matchResults[i] && basePiece.isDownRightCornerMatch()) ) hasMatchResults[i]=false;
-							
-				    		if (!matchResults[i] && !basePiece.getPiece()[i][N-1] && !matchPiece.getPiece()[i][0]  
-				    				&& (basePiece.getPiece()[i][N-2]||matchPiece.getPiece()[i][1]) )
-								matchResults[i] = true;
-				    	}
-				    	hasMatch = hasMatch && matchResults[i];
-				    }
-				    
-					if (hasMatch) {
-						basePiece.setUpRightCornerMatch(matchResults[0]);
-						matchPiece.setUpLeftCornerMatch(matchResults[0]);
-						basePiece.setDownRightCornerMatch(matchResults[N-1]);
-						matchPiece.setDownLeftCornerMatch(matchResults[N-1]);
-						
-						basePiece.setRightMatchPieceID(matchPiece.getID());
-						matchPiece.setLeftMatchPieceID(basePiece.getID());
-					}
 
+			if (edgeSide == UP_EDGE) {
+				basePiece.matchAtUp(matchPiece);
+				if (basePiece.getUpMatchPieceID() == matchPiece.getID())  return true;
+			}else if(edgeSide == RIGHT_EDGE) {
+				basePiece.matchAtRight(matchPiece);
+				if (basePiece.getRightMatchPieceID() == matchPiece.getID())  return true;
 			}else if(edgeSide == DOWN_EDGE) {
-					for(int i=0; i<N; i++) {					
-						matchResults[i] = basePiece.getPiece()[N-1][i]^matchPiece.getPiece()[0][i];
-						if (i==0 || i==N-1) {
-	
-							if  ((i==0 && matchResults[i] && basePiece.isDownLeftCornerMatch()) ||
-							    (i==N-1 && matchResults[i] && basePiece.isDownRightCornerMatch()))  hasMatchResults[i]=false;
-							
-							if (!matchResults[i] && !basePiece.getPiece()[N-1][i] && !matchPiece.getPiece()[0][i]  
-								&& (basePiece.getPiece()[N-2][i]||matchPiece.getPiece()[1][i]) )
-									matchResults[i] = true;
-						}
-						hasMatch = hasMatch && matchResults[i];
-					}
-					if (hasMatch) {
-						basePiece.setDownLeftCornerMatch(matchResults[0]);
-						matchPiece.setUpLeftCornerMatch(matchResults[0]);
-						basePiece.setDownRightCornerMatch(matchResults[N-1]);
-						matchPiece.setUpRightCornerMatch(matchResults[N-1]);
-						
-						basePiece.setDownMatchPieceID(matchPiece.getID());
-						matchPiece.setUpMatchPieceID(basePiece.getID());
-					}
-					
+				basePiece.matchAtDown(matchPiece);
+				if (basePiece.getDownMatchPieceID() == matchPiece.getID())  return true;
 			}else if(edgeSide == LEFT_EDGE) {
-					for(int i=0; i<N; i++) {	
-						matchResults[i] = basePiece.getPiece()[i][0]^matchPiece.getPiece()[i][N-1];
-						if (i==0 || i==N-1) {
-						
-							if  ((i==0 && matchResults[i] && basePiece.isUpLeftCornerMatch()) ||
-							    (i==N-1 && matchResults[i] && basePiece.isDownLeftCornerMatch()) ) hasMatchResults[i]=false;
-							
-							if (!matchResults[i] && !basePiece.getPiece()[i][0] && !matchPiece.getPiece()[i][N-1]  
-							&& (basePiece.getPiece()[i][1]||matchPiece.getPiece()[i][N-2]) )
-								matchResults[i] = true;
-						}
-						hasMatch = hasMatch && matchResults[i];
-					}
-					
-					if (hasMatch) {
-						basePiece.setUpLeftCornerMatch(matchResults[0]);
-						matchPiece.setUpRightCornerMatch(matchResults[0]);
-						basePiece.setDownLeftCornerMatch(matchResults[N-1]);
-						matchPiece.setDownRightCornerMatch(matchResults[N-1]);
-						
-						basePiece.setLeftMatchPieceID(matchPiece.getID());
-						matchPiece.setRightMatchPieceID(basePiece.getID());
-					}	
-			}	
-						
-			
-			if (hasMatch) {
-				matchPiece.setRotateStep(k+1);
-				System.out.println( getEdgeName(edgeSide) );
-				
-				//basePiece.printPiece();
-				matchPiece.printPiece();				
-				stack.push(this);
-				
-				return true;
-			}
-			else if (k!=3) { 
-				CubePiece.rotatePiece(matchPiece.getPiece());
-				//System.out.println(k);
-				
-			}
-			else { // Once rotate 360°, mirror the piece.
-				CubePiece.rotatePiece(matchPiece.getPiece());
-				CubePiece.mirroringPiece(matchPiece.getPiece());
-				matchPiece.setMirroring(true);
-			}
+				basePiece.matchAtLeft(matchPiece);
+				if (basePiece.getLeftMatchPieceID() == matchPiece.getID())  return true;
+			}			
+		
 		}
 		return false;
-
 	}
 	
+		
 	
 	public boolean matchAllEdges(CubePiece basePiece,CubePiece matchPiece ){
 		
@@ -269,32 +91,7 @@ public class Cube {
 	}
 	
 	
-	public boolean match2Edges(Edge baseEdge, Edge matchEdge){
-		int N = baseEdge.getEdge()[0].length ;
-		boolean [] matchResults = {false,false,false,false,false};
-		boolean hasMatch=true;
 
-		for(int i=0; i<N; i++) {
-			matchResults[i] = baseEdge.getEdge()[0][i]^matchEdge.getEdge()[0][i];		
-			
-			if (i==0 || i==N-1) {	
-				if (!matchResults[i] && !baseEdge.getEdge()[0][i] && !matchEdge.getEdge()[0][i]  
-					&& (baseEdge.getEdge()[1][i]||matchEdge.getEdge()[1][i]) ){
-						matchResults[i] = true;
-				}
-		    }
-			
-			hasMatch = hasMatch && matchResults[i];
-		}	
-		
-		/*Show Edge match results*/
-		baseEdge.printEdge();
-		matchEdge.printEdge();
-		System.out.println("hasMatch=" + hasMatch);
-		
-		return hasMatch;
-		
-	}
 	
 
 public boolean matchFacePiece(CubePiece basePiece, CubePiece matchPiece){
@@ -449,17 +246,17 @@ public boolean matchFacePiece(CubePiece basePiece, CubePiece matchPiece){
 	}
 
 	/**
-	 * @return the candidaturePieces
+	 * @return the candidatePiecesID
 	 */
-	public CubeStateStack<Integer> getCandidaturePieces() {
-		return candidaturePieces;
+	public CubeStateStack<Integer> getcandidatePiecesID() {
+		return candidatePiecesID;
 	}
 
 	/**
-	 * @param candidaturePieces the candidaturePieces to set
+	 * @param candidatePiecesID the candidatePiecesID to set
 	 */
-	public void setCandidaturePieces(CubeStateStack<Integer> candidaturePieces) {
-		this.candidaturePieces = candidaturePieces;
+	public void setcandidatePiecesID(CubeStateStack<Integer> candidatePiecesID) {
+		this.candidatePiecesID = candidatePiecesID;
 	}
 
 	/**
@@ -512,4 +309,35 @@ public boolean matchFacePiece(CubePiece basePiece, CubePiece matchPiece){
 		this.noMatchID = noMatchID;
 	}
 
+	
+	public CubeStateStack<Cube> getStack(){
+		return stateStack;	
+	}
+	
+	public void setStack(CubeStateStack<Cube> stateStack){
+		this.stateStack = stateStack;
+	}
+	
+	
+	public String getEdgeName(int i) {
+		String edgeString = null;
+	 
+		switch (i) {
+        case UP_EDGE:  	 edgeString = "UP_EDGE";
+                 break;
+        case RIGHT_EDGE: edgeString = "RIGHT_EDGE";
+                 break;
+        case DOWN_EDGE:  edgeString = "DOWN_EDGE";
+        		break;
+        case LEFT_EDGE:  edgeString = "LEFT_EDGE";
+				break; 		
+		}
+		return edgeString;
+	}
+	
+	
+	
+	public CubePiece getCubePiece(int i){
+		return (CubePiece)this.cubePieces.get(i);	
+	}
 }

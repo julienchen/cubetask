@@ -3,18 +3,22 @@ package happycube;
 public class CubePiece {
 	
 	private int ID;
+	private boolean [][] piece;
+	
 	private int upMatchPieceID;
 	private int rightMatchPieceID;
 	private int downMatchPieceID;
 	private int leftMatchPieceID;
 	private int faceMatchPieceID;
-	private boolean [][] piece;
+	
 	private Edge upEdge;
 	private Edge rightEdge;
 	private Edge downEdge;
 	private Edge leftEdge;
+	
 	private boolean mirroring;
 	private int rotateStep;
+	
 	private boolean upLeftCornerMatch;
 	private boolean upRightCornerMatch;
 	private boolean downLeftCornerMatch;
@@ -376,7 +380,20 @@ public class CubePiece {
 		this.faceMatchPieceID = faceMatchPieceID;
 	}
 
-
-	
+	public boolean matchAtUp(CubePiece matchPiece){
+		return true;
 	}
+
+	public boolean matchAtRight(CubePiece matchPiece){
+		return true;
+	}
+	
+	public boolean matchAtDown(CubePiece matchPiece){
+		return true;
+	}
+	
+	public boolean matchAtLeft(CubePiece matchPiece){
+		return true;
+	}
+}
 		
