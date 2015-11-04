@@ -3,6 +3,7 @@ package happycube;
 public class Edge {
    
 	private boolean [][] edge; 
+	private int ID;
 	private boolean leftCornerMatch;
 	private boolean rightCornerMatch;
 	private int leftMatchPieceID;
@@ -10,8 +11,12 @@ public class Edge {
 	private int matchPieceID;
 	
 	
-	public Edge(boolean [][] edge) {
-		this.setEdge(edge); 
+	public Edge(boolean [][] edge,int ID, int matchPieceID, int leftMatchPieceID,int rightMatchPieceID) {
+		this.setEdge(edge);
+		this.ID = ID;
+		this.matchPieceID = matchPieceID;
+		this.leftMatchPieceID = leftMatchPieceID;
+		this.rightMatchPieceID = rightMatchPieceID;
 	}
 
 	/**
@@ -107,12 +112,83 @@ public class Edge {
 		matchEdge.printEdge();
 		System.out.println("hasMatch=" + hasMatch);
 		
+		if (hasMatch) baseEdge.setMatchPieceID(matchEdge.getID());
 		return hasMatch;
 		
 	}
 	
-	public void matchWithEdge(Edge matchEdge) {
+	public boolean matchWithEdge(Edge matchEdge) {
+		int N = this.getEdge()[0].length ;
+		boolean [] matchResults = {false,false,false,false,false};
+		boolean [] hasMatchResults = {false,false,false,false,false} ;
+		boolean hasMatch=true;
+        
+		if (this.getMatchPieceID() > 0) return false;
+	 
+		for(int i=0; i<N; i++) {
+			// XOR the match pairs
+			matchResults[i] = this.getEdge()[0][i]^matchEdge.getEdge()[N-1][i];	
+			hasMatchResults[i] = matchResults[i];
+			
+			// The corner of Cube can not be (1,1), Otherwise is OK
+			if (i==0) {		
+				// has not matched piece
+				if (this.getLeftMatchPieceID() == 0) {
+					// 0 vs 0
+					if (!matchResults[i] && !this.getEdge()[0][i] && !matchEdge.getEdge()[N-1][i]  
+							&& (this.getEdge()[1][i]||matchEdge.getEdge()[N-2][i]) ) {
+							hasMatchResults[i] = true;
+					}
+					
+				}else { //has not matched piece   1 vs matched
+					if (matchEdge.getEdge()[N-1][i] && this.isLeftCornerMatch())
+						hasMatchResults[i]=false;
+					
+					   // 0 vs 0
+					if (!matchResults[i] && !this.getEdge()[0][i] && !matchEdge.getEdge()[N-1][i]  
+							&& (this.getEdge()[1][i]||matchEdge.getEdge()[N-2][i]) ) {
+							hasMatchResults[i] = true;
+					}
+				
+				}
+			}
 
+			if (i==N-1) {
+				// has not matched piece
+				if (this.getRightMatchPieceID()== 0) {
+					// 0 vs 0
+					if (!matchResults[i] && !this.getEdge()[0][i] && !matchEdge.getEdge()[N-1][i]  
+							&& (this.getEdge()[1][i]||matchEdge.getEdge()[N-2][i]) ) {
+							hasMatchResults[i] = true;
+					}
+				}else { //has not matched piece   1 vs matched
+					if (matchEdge.getEdge()[N-1][i] && this.isRightCornerMatch())
+						hasMatchResults[i]=false;
+					
+					   // 0 vs 0
+					if (!matchResults[i] && !this.getEdge()[0][i] && !matchEdge.getEdge()[N-1][i]  
+							&& (this.getEdge()[1][i]||matchEdge.getEdge()[N-2][i]) ) {
+							hasMatchResults[i] = true;
+					}
+				
+				}
+			}	
+		
+		
+			hasMatch = hasMatch && matchResults[i];
+		}
+		
+		/*Show Edge match results*/
+		this.printEdge();
+		matchEdge.printEdge();
+		System.out.println("hasMatch=" + hasMatch);
+		
+		if (hasMatch) {
+			this.setMatchPieceID(matchEdge.getID());
+		    this.setLeftCornerMatch(matchResults[0]);
+		    this.setRightCornerMatch(matchResults[N-1]);
+		}
+		return hasMatch;
 	}
 	
 	public void printEdge() {
@@ -196,5 +272,19 @@ public class Edge {
 	 */
 	public void setMatchPieceID(int matchPieceID) {
 		this.matchPieceID = matchPieceID;
+	}
+
+	/**
+	 * @return the iD
+	 */
+	public int getID() {
+		return ID;
+	}
+
+	/**
+	 * @param iD the iD to set
+	 */
+	public void setID(int iD) {
+		ID = iD;
 	}
 }

@@ -34,16 +34,16 @@ public class CubePiece {
 		this.setMirroring(false);
 		this.setRotateStep(0);
 
-		this.upEdge = new Edge(piece);
+		this.upEdge = new Edge(piece,ID,0,0,0);
 		
 		CubePiece.rotatePiece(piece);
-		this.rightEdge = new Edge(piece);
+		this.rightEdge = new Edge(piece,ID,0,0,0);
 		
 		CubePiece.rotatePiece(piece);
-		this.downEdge = new Edge(piece);
+		this.downEdge = new Edge(piece,ID,0,0,0);
 		
 		CubePiece.rotatePiece(piece);
-		this.leftEdge = new Edge(piece);
+		this.leftEdge = new Edge(piece,ID,0,0,0);
 		
 		CubePiece.rotatePiece(piece);
 		

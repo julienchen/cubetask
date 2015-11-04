@@ -40,9 +40,6 @@ public class Cube {
 	
 	public boolean match2Pieces(CubePiece basePiece, int edgeSide, CubePiece matchPiece, boolean isAbleToRotate) {
 		int N = basePiece.getPiece()[0].length;
-		boolean [] matchResults = {false,false,false,false,false};
-		boolean [] hasMatchResults = {false,false,false,false,false} ;
-		boolean hasMatch;
 		int rotateeMaxTime;
 		
 		// Once the edge side has been occupied, then stop the matching process
@@ -76,6 +73,24 @@ public class Cube {
 		return false;
 	}
 	
+	public boolean matchFacePiece(CubePiece basePiece, CubePiece matchPiece){
+		
+	    while (matchPiece.getRotateStep() < 7) {
+			if (matchAllEdges(this.getCubePiece(basePiece.getUpMatchPieceID()),matchPiece)) {
+				
+				if (basePiece.getRightEdge().matchWithEdge(matchPiece.getRightEdge()) &&
+                    basePiece.getDownEdge().matchWithEdge(matchPiece.getDownEdge())&&
+                    basePiece.getLeftEdge().matchWithEdge(matchPiece.getLeftEdge()) )
+				{
+					System.out.println( "AT FACE" );
+					matchPiece.printPiece();
+					return true;
+				}
+			}
+	     }
+			
+			return false;		
+	}
 		
 	
 	public boolean matchAllEdges(CubePiece basePiece,CubePiece matchPiece ){
@@ -90,29 +105,6 @@ public class Cube {
 		return false;
 	}
 	
-	
-
-	
-
-public boolean matchFacePiece(CubePiece basePiece, CubePiece matchPiece){
-		
-    while (matchPiece.getRotateStep() < 7) {
-		if (matchAllEdges(this.getCubePiece(basePiece.getUpMatchPieceID()),matchPiece)) {
-			
-			if (match2Edges(basePiece.getRightEdge(),matchPiece.getRightEdge()) &&
-				match2Edges(basePiece.getDownEdge(),matchPiece.getDownEdge())  &&
-				match2Edges(basePiece.getLeftEdge(),matchPiece.getLeftEdge()))
-			{
-				System.out.println( "AT FACE" );
-				matchPiece.printPiece();
-				return true;
-			}
-		}
-     }
-		
-		return false;		
-}
-
 	
 	
 	public static void main(String[] args) {
